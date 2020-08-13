@@ -3,7 +3,7 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-function(clangformat_setup)
+function(clangformat_setup target)
   if(NOT CLANGFORMAT_EXECUTABLE)
     set(CLANGFORMAT_EXECUTABLE clang-format)
   endif()
@@ -18,12 +18,12 @@ function(clangformat_setup)
     endif()
   endif()
 
-  foreach(clangformat_source ${ARGV})
+  foreach(clangformat_source ${ARGN})
     get_filename_component(clangformat_source ${clangformat_source} ABSOLUTE)
     list(APPEND clangformat_sources ${clangformat_source})
   endforeach()
 
-  add_custom_target(${PROJECT_NAME}_clangformat
+  add_custom_target(${target}_clangformat
     COMMAND
       ${CLANGFORMAT_EXECUTABLE}
       -style=file
@@ -32,17 +32,17 @@ function(clangformat_setup)
     WORKING_DIRECTORY
       ${CMAKE_SOURCE_DIR}
     COMMENT
-      "Formating with ${CLANGFORMAT_EXECUTABLE} ..."
+      "Formatting target ${target} with ${CLANGFORMAT_EXECUTABLE} ..."
   )
 
   if(TARGET clangformat)
-    add_dependencies(clangformat ${PROJECT_NAME}_clangformat)
+    add_dependencies(clangformat ${target}_clangformat)
   else()
-    add_custom_target(clangformat DEPENDS ${PROJECT_NAME}_clangformat)
+    add_custom_target(clangformat DEPENDS ${target}_clangformat)
   endif()
 endfunction()
 
 function(target_clangformat_setup target)
   get_target_property(target_sources ${target} SOURCES)
-  clangformat_setup(${target_sources})
+  clangformat_setup(${target} ${target_sources})
 endfunction()
